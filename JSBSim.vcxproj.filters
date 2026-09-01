@@ -338,6 +338,9 @@
     <ClCompile Include="src\input_output\FGLog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="iSimABI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\input_output\FGInputSocket.h">
@@ -698,6 +701,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\input_output\FGLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iSimABI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
