@@ -24,16 +24,21 @@ extern "C" {
 
   void JSBSim_Destroy(void* ptr){
     delete static_cast<JSBSim_FDM*>(ptr);
-    
   }
 
   bool JSBSim_SetDirectories(void* ptr, const char* rootDir, const char* aircraftDir, const char* engineDir, const char* systemsDir){
     auto* JSB=static_cast<JSBSim_FDM*>(ptr);
-    JSB->fdm->SetRootDir(SGPath(rootDir));
-    JSB->fdm->SetAircraftPath(SGPath(aircraftDir));
-    JSB->fdm->SetEnginePath(SGPath(engineDir));
-    JSB->fdm->SetSystemsPath(SGPath(systemsDir));
-    return false;
+    try{
+      JSB->fdm->SetRootDir(SGPath(rootDir));
+      JSB->fdm->SetAircraftPath(SGPath(aircraftDir));
+      JSB->fdm->SetEnginePath(SGPath(engineDir));
+      JSB->fdm->SetSystemsPath(SGPath(systemsDir));
+      return true;
+    }
+    catch(int err){
+      cout<<"Error setting directories: "<<err<<endl;
+      return false;
+    }
   }
 
   bool JSBSim_LoadModel(void* ptr, const char* modelPath){
@@ -66,8 +71,10 @@ extern "C" {
 
   dllExport bool JSBSim_SetPropertyValue(void* ptr, const uint32_t propertyID, double value){
     try{
-
       auto* JSB=static_cast<JSBSim_FDM*>(ptr);
+      if(propertyID>=JSB->properties.size()){
+        return false;
+      }
       JSB->properties[propertyID]->setDoubleValue(value);
       return true;
     }
@@ -80,11 +87,14 @@ extern "C" {
   dllExport double JSBSim_GetPropertyValue(void* ptr, const uint32_t propertyID){
     try{
       auto* JSB=static_cast<JSBSim_FDM*>(ptr);
+      if(propertyID>=JSB->properties.size()){
+        return UINT32_MAX;
+      }
       return JSB->properties[propertyID]->getDoubleValue();
 
     } catch(int err){
-      cout<<"Error setting property: "<<err<<endl;
-      return 0;
+      cout<<"Error getting property: "<<err<<endl;
+      return UINT32_MAX;
     }
   }
 
@@ -103,7 +113,7 @@ extern "C" {
     auto propertyManager=JSB->fdm->GetPropertyManager();
     auto node=propertyManager->GetNode(propertyPath, false);
 
-    //if we cant find the node, return false and let the xplane side handle it
+    //if we cant find the node, return UINT32_MAX and let the xplane side handle it
     if(!node){
       return UINT32_MAX;
     }

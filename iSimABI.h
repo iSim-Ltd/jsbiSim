@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 #define dllExport __declspec(dllexport)
 
 extern "C" {
