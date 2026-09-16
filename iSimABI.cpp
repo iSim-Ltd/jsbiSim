@@ -102,26 +102,34 @@ extern "C" {
   // This is to avoid the overhead of searching for the property every time it is requested.
   // The vector of property pointers will be stored in the JSBSim_FDM struct and will be used to retrieve the property value directly.
   dllExport uint32_t JSBSim_PreFetch(void* ptr, const char* propertyPath){
-    auto* JSB=static_cast<JSBSim_FDM*>(ptr);
-    auto it=JSB->propertyIDMap.find(propertyPath);
+    try      {
+      auto* JSB=static_cast<JSBSim_FDM*>(ptr);
+      auto it=JSB->propertyIDMap.find(propertyPath);
 
-    //if we find the property, exit we already have it stored
-    if(it!=JSB->propertyIDMap.end()){
-      return it->second;
+      //if we find the property, exit we already have it stored
+      if(it!=JSB->propertyIDMap.end()){
+        return it->second;
+      }
+
+      auto propertyManager=JSB->fdm->GetPropertyManager();
+      auto node=propertyManager->GetNode(propertyPath, false);
+
+      if(!node){
+        return UINT32_MAX;
+      }
+
+ 
+
+      uint32_t index=static_cast<uint32_t>(JSB->properties.size());
+      JSB->properties.push_back(node);
+      JSB->propertyIDMap[propertyPath]=index;
+      return index;
     }
-
-    auto propertyManager=JSB->fdm->GetPropertyManager();
-    auto node=propertyManager->GetNode(propertyPath, false);
-
-    //if we cant find the node, return UINT32_MAX and let the xplane side handle it
-    if(!node){
+    catch(...){
+      //jsb throws an error when the node is not found, return UINT32_MAX to indicate that the property was not found
       return UINT32_MAX;
     }
-
-    uint32_t index=static_cast<uint32_t>(JSB->properties.size());
-    JSB->properties.push_back(node);
-    JSB->propertyIDMap[propertyPath]=index;
-    return index;
+   
   }
 
 }
