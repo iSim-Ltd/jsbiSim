@@ -5,10 +5,10 @@
 extern "C" {
 
   struct engineInfo{
-    int numEngines;
-    int numTanks;
-    int engineType;
-    bool success;
+    uint32_t numEngines;
+    uint32_t numTanks;
+    uint32_t engineType;
+    uint8_t success;
   };
 
   //lifeCycle Functions
