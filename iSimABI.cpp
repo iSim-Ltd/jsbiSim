@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include "iSimABI.h"
 #include "FGFDMExec.h"
+#include "models/FGPropulsion.h"
 #include "initialization/FGInitialCondition.h"
 
 using namespace std;
@@ -41,9 +42,30 @@ extern "C" {
     }
   }
 
-  bool JSBSim_LoadModel(void* ptr, const char* modelPath){
-    auto* JSB=static_cast<JSBSim_FDM*>(ptr);
-    return JSB->fdm->LoadModel(modelPath);
+  engineInfo JSBSim_LoadModel(void* ptr, const char* modelPath){
+    try{
+      auto* JSB=static_cast<JSBSim_FDM*>(ptr);
+      JSB->fdm->LoadModel(modelPath);
+
+      engineInfo info;
+
+      auto propulsion=JSB->fdm->GetPropulsion();
+      info.numEngines=propulsion->GetNumEngines();
+      info.numTanks=propulsion->GetNumTanks();
+      info.engineType=propulsion->GetEngine(0)->GetType();
+
+      info.success=true;
+      return info;
+    }
+    catch(...){
+      engineInfo info;
+      info.numEngines=0;
+      info.numTanks=0;
+      info.engineType=0;
+      info.success=false;
+      return info;
+    }
+
   }
 
   bool JSBSim_RunIC(void* ptr){
@@ -65,7 +87,7 @@ extern "C" {
 
 
   bool JSBSim_FlightLoop(void* ptr){
-    auto* JSB=static_cast<JSBSim_FDM*>(ptr);
+    auto* JSB=static_cast<JSBSim_FDM*>(ptr);    
     return JSB->fdm->Run();
   }
 

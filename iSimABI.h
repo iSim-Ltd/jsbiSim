@@ -4,6 +4,13 @@
 
 extern "C" {
 
+  struct engineInfo{
+    int numEngines;
+    int numTanks;
+    int engineType;
+    bool success;
+  };
+
   //lifeCycle Functions
   dllExport void* JSBSim_Create();
   dllExport void JSBSim_Destroy(void* ptr);
@@ -11,7 +18,7 @@ extern "C" {
 
   //Loading Functions
   dllExport bool JSBSim_SetDirectories(void* ptr, const char* rootDir, const char* aircraftDir, const char* engineDir, const char* systemsDir);
-  dllExport bool JSBSim_LoadModel(void* ptr, const char* modelPath);
+  dllExport engineInfo JSBSim_LoadModel(void* ptr, const char* modelPath);
 
   //Setup Functions
   dllExport bool JSBSim_SetInitialCondition(void* ptr, double lat, double lon, double altft, double hdgTrue, double kts);
