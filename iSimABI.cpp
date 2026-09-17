@@ -45,16 +45,14 @@ extern "C" {
   engineInfo JSBSim_LoadModel(void* ptr, const char* modelPath){
     try{
       auto* JSB=static_cast<JSBSim_FDM*>(ptr);
-      JSB->fdm->LoadModel(modelPath);
-
       engineInfo info;
 
+      info.success =  JSB->fdm->LoadModel(modelPath);
       auto propulsion=JSB->fdm->GetPropulsion();
       info.numEngines=propulsion->GetNumEngines();
       info.numTanks=propulsion->GetNumTanks();
       info.engineType=propulsion->GetEngine(0)->GetType();
 
-      info.success=true;
       return info;
     }
     catch(...){
