@@ -354,6 +354,7 @@
     <ClInclude Include="src\simgear\xml\xmlrole.h" />
     <ClInclude Include="src\simgear\xml\xmltok.h" />
     <ClInclude Include="src\simgear\xml\xmltok_impl.h" />
+    <ClInclude Include="xpGroundCallback.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="iSimABI.cpp" />
@@ -466,6 +467,7 @@
     <ClCompile Include="src\simgear\misc\sg_path.cxx" />
     <ClCompile Include="src\simgear\misc\strutils.cxx" />
     <ClCompile Include="src\simgear\io\iostreams\sgstream.cxx" />
+    <ClCompile Include="xpGroundCallback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuildStep Include="data_output\ground_reactions.xml">
