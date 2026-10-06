@@ -15,30 +15,12 @@ extern "C" {
     unique_ptr<JSBSim::FGFDMExec> fdm;
     vector<SGPropertyNode_ptr> properties;
     std::unordered_map<std::string, uint32_t> propertyIDMap;
-    struct xpContact{
-      double agl;
-      double normalX;
-      double normalY;
-      double normalZ;
-    };
-    xpContact xpGroundContact={
-      0.0, //agl
-      0.0, //normalX
-      0.0, //normalY
-      1.0  //normalZ
-    };
   };
 
   //create function that also is responsible for registering the ground callback with the FDM.
   void* JSBSim_Create(){
     auto* handle=new JSBSim_FDM;
     handle->fdm=make_unique<JSBSim::FGFDMExec>();
-
-    handle->fdm->GetInertial()->SetGroundCallback(new xpGroundCallback(
-      &handle->xpGroundContact.agl,
-      &handle->xpGroundContact.normalX,
-      &handle->xpGroundContact.normalY,
-      &handle->xpGroundContact.normalZ));
     return handle;
   }
 
@@ -189,13 +171,9 @@ extern "C" {
    
   }
 
-  dllExport void JSBSim_SetGroundContact(void* ptr, double agl, double normalX,double normalY,double normalZ){
+  dllExport void JSBSim_SetGroundCallback(void* ptr, GroundContactCallback callback){
     auto* JSB=static_cast<JSBSim_FDM*>(ptr);
-    JSB->xpGroundContact.agl=agl;
-    JSB->xpGroundContact.normalX=normalX;
-    JSB->xpGroundContact.normalY=normalY;
-    JSB->xpGroundContact.normalZ=normalZ;
-    return;
+    JSB->fdm->GetInertial()->SetGroundCallback(new xpGroundCallback(callback));
   }
 
 }

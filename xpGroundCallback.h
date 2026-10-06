@@ -2,18 +2,18 @@
 
 #include <math/FGLocation.h>
 #include "input_output/FGGroundCallback.h"
+#include "iSimABI.h"
+#include <math/FGColumnVector3.h>
+#include "input_output/FGLog.h"
 
 class xpGroundCallback :public JSBSim::FGGroundCallback{
 public:
-  xpGroundCallback(const double* aglElev, const double* nX, const double* nY, const double* nZ) : terrainElevation(aglElev), normalX(nX), normalY(nY), normalZ(nZ){}
+  xpGroundCallback(GroundContactCallback callback)
+    : callback(callback){}
   double GetAGLevel(double t, const JSBSim::FGLocation& location,
     JSBSim::FGLocation& contact,
     JSBSim::FGColumnVector3& normal, JSBSim::FGColumnVector3& v,
     JSBSim::FGColumnVector3& w) const override;
 
-private:
-  const double* terrainElevation;
-  const double* normalX;
-  const double* normalY;
-  const double* normalZ;
+  GroundContactCallback callback;
 };

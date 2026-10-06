@@ -14,6 +14,18 @@ extern "C" {
     uint8_t success;
   };
 
+  struct groundContact{
+    double agl;
+    double normalX;
+    double normalY;
+    double normalZ;
+  };
+
+  // Callback implemented on the host (X-Plane plugin) side.
+// Called synchronously by JSBSim's ground callback with  lat/lon (degrees)
+// of the specific contact point being queried; host fills in *outResult
+// (e.g. from a main-thread-updated, at-most-one-frame-old sample cache).
+  typedef void (*GroundContactCallback)(double latitudeDeg, double longitudeDeg, groundContact* outResult);
 
 
   //lifeCycle Functions
@@ -37,7 +49,7 @@ extern "C" {
   dllExport double JSBSim_GetPropertyValue(void* ptr, const uint32_t propertyID);
   dllExport uint32_t JSBSim_PreFetch(void* ptr, const char* propertyPath);
 
-  dllExport void JSBSim_SetGroundContact(void* ptr, double agl, double normalX,double normalY,double normalZ);
+  dllExport void JSBSim_SetGroundCallback(void* ptr, GroundContactCallback callback);
 
 }
 
@@ -56,5 +68,5 @@ struct JSB_Functions{
   decltype(&JSBSim_SetPropertyValue)         setPropertyValue;
   decltype(&JSBSim_GetPropertyValue)         getPropertyValue;
   decltype(&JSBSim_PreFetch)              preFetch;
-  decltype(&JSBSim_SetGroundContact) setGroundContact;
+  decltype(&JSBSim_SetGroundCallback) setGroundCallback;
 };

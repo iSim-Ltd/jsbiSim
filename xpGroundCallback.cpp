@@ -1,12 +1,10 @@
 #include "xpGroundCallback.h"
-#include <math/FGLocation.h>
-#include <math/FGColumnVector3.h>
-#include "input_output/FGLog.h"
 
 //this function is called by the FDM for EACH contact point on the aircraft (gear, wings, body etc) to determine attitude when touching the ground
 //location is the location of the contact itself. XP probe data needs to be fed per location
 double xpGroundCallback::GetAGLevel(double t, const JSBSim::FGLocation& location, JSBSim::FGLocation& contact, JSBSim::FGColumnVector3& normal, JSBSim::FGColumnVector3& vel, JSBSim::FGColumnVector3& angularVel) const{
- 
+
+  JSBSim::FGLogging log(JSBSim::LogLevel::INFO);
   vel.InitMatrix();
   angularVel.InitMatrix();
 
@@ -19,10 +17,28 @@ double xpGroundCallback::GetAGLevel(double t, const JSBSim::FGLocation& location
   double latitude=l.GetGeodLatitudeRad();
   double longitude=l.GetLongitude();
 
+  double latDeg=l.GetLatitudeDeg();
+  double lonDeg=l.GetLongitudeDeg();
+
+
+  groundContact contactData{};
+  if(callback){
+    callback(latDeg, lonDeg, &contactData);
+    //log<<"Sending lat/lon/alt: "<<latitude<<", "<<longitude<< "," << contactData.agl << std::endl;
+  } else{
+    //log<<"xpGroundCallback: No callback set for ground contact data"<<std::endl;
+    contactData.agl=0;
+    contactData.normalX=0;
+    contactData.normalY=0;
+    contactData.normalZ=1;
+  }
+
+
+
   //converting xp normal vector to ECEF normal vector
-  double east=*normalX;
-  double up=*normalY;
-  double north=-*normalZ;
+  double east=contactData.normalZ;
+  double up=contactData.normalY;
+  double north=-contactData.normalX;
 
   double sinLat=sin(latitude);
   double cosLat=cos(latitude);
@@ -41,7 +57,8 @@ double xpGroundCallback::GetAGLevel(double t, const JSBSim::FGLocation& location
 
 
   //contact.SetEllipse(a, b);
-  contact.SetPositionGeodetic(longitude, latitude, *terrainElevation);
+  contact.SetPositionGeodetic(longitude, latitude, contactData.agl);
 
-  return l.GetGeodAltitude()-*terrainElevation;
+  //log<<"Alt at contact : "<<latitude<<", "<<longitude<< "," << contactData.agl << std::endl;
+  return l.GetGeodAltitude()-contactData.agl;
 }
