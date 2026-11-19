@@ -4,7 +4,7 @@
 #include "FGFDMExec.h"
 #include "models/FGPropulsion.h"
 #include "xpGroundCallback.h"
-#include "models/FGinertial.h"
+#include "models/FGInertial.h"
 #include "initialization/FGInitialCondition.h"
 #include "models/FGGroundReactions.h"
 using namespace std;
@@ -55,6 +55,12 @@ extern "C" {
       //no support for multiple differing engine types, just return the type of the first engine
       info.engineType=propulsion->GetEngine(0)->GetType();
 
+      //disable JSB fuel handling to allow our plugins to handle fuel consumption (and fuel tank transfers)
+      for(int i=0; i<info.numEngines; i++){
+        auto engine=propulsion->GetEngine(i);
+        engine->SetFuelFreeze(true);
+      }
+
       //get contact info from ground reactions for use with groundprobes for ground callback
       auto groundReactions=JSB->fdm->GetGroundReactions();
       auto numGear=groundReactions->GetNumGearUnits();
@@ -99,6 +105,8 @@ extern "C" {
     IC->SetAltitudeASLFtIC(altft);
     IC->SetPsiDegIC(hdgTrue);
     IC->SetVcalibratedKtsIC(kts);
+
+
     return true;
   }
 
