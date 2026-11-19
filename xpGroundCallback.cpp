@@ -36,9 +36,9 @@ double xpGroundCallback::GetAGLevel(double t, const JSBSim::FGLocation& location
 
 
   //converting xp normal vector to ECEF normal vector
-  double east=contactData.normalZ;
+  double east=contactData.normalX;
   double up=contactData.normalY;
-  double north=-contactData.normalX;
+  double north=-contactData.normalZ;
 
   double sinLat=sin(latitude);
   double cosLat=cos(latitude);
