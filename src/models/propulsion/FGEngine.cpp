@@ -232,8 +232,11 @@ bool FGEngine::Load(FGFDMExec *exec, Element *engine_element)
   string property_name, base_property_name;
   base_property_name = CreateIndexedPropertyName("propulsion/engine", EngineNumber);
 
+  property_name=base_property_name+"/set-starved";
+  PropertyManager->Tie(property_name.c_str(), this, &FGEngine::GetStarved, &FGEngine::SetStarved);
+
   property_name = base_property_name + "/set-running";
-  PropertyManager->Tie( property_name.c_str(), this, &FGEngine::GetRunning, &FGEngine::SetRunning );
+  PropertyManager->Tie( property_name.c_str(), this, &FGEngine::GetRunning, &FGEngine::SetRunning);
   property_name = base_property_name + "/thrust-lbs";
   PropertyManager->Tie( property_name.c_str(), Thruster, &FGThruster::GetThrust);
   property_name = base_property_name + "/fuel-flow-rate-pps";
