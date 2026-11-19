@@ -17,7 +17,7 @@ double xpGroundCallback::GetAGLevel(double t, const JSBSim::FGLocation& location
   double latitude=l.GetGeodLatitudeRad();
   double longitude=l.GetLongitude();
 
-  double latDeg=l.GetLatitudeDeg();
+  double latDeg=l.GetGeodLatitudeDeg();
   double lonDeg=l.GetLongitudeDeg();
 
 
