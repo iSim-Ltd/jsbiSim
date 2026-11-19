@@ -3,8 +3,10 @@
 #include "iSimABI.h"
 #include "FGFDMExec.h"
 #include "models/FGPropulsion.h"
+#include "xpGroundCallback.h"
+#include "models/FGInertial.h"
 #include "initialization/FGInitialCondition.h"
-
+#include "models/FGGroundReactions.h"
 using namespace std;
 
 extern "C" {
@@ -15,8 +17,7 @@ extern "C" {
     std::unordered_map<std::string, uint32_t> propertyIDMap;
   };
 
-  //create function that also is responsible for filling in the references to all the FDM components
-  //doing it this way ensures that we have the correct instance of each component owned and controlled by our FDMExec instance
+  //create function that also is responsible for registering the ground callback with the FDM.
   void* JSBSim_Create(){
     auto* handle=new JSBSim_FDM;
     handle->fdm=make_unique<JSBSim::FGFDMExec>();
@@ -42,24 +43,48 @@ extern "C" {
     }
   }
 
-  engineInfo JSBSim_LoadModel(void* ptr, const char* modelPath){
+  modelInfo JSBSim_LoadModel(void* ptr, const char* modelPath){
     try{
       auto* JSB=static_cast<JSBSim_FDM*>(ptr);
-      engineInfo info;
+      modelInfo info;
 
       info.success =  JSB->fdm->LoadModel(modelPath);
       auto propulsion=JSB->fdm->GetPropulsion();
       info.numEngines=propulsion->GetNumEngines();
       info.numTanks=propulsion->GetNumTanks();
+      //no support for multiple differing engine types, just return the type of the first engine
       info.engineType=propulsion->GetEngine(0)->GetType();
+
+      //disable JSB fuel handling to allow our plugins to handle fuel consumption (and fuel tank transfers)
+      for(int i=0; i<info.numEngines; i++){
+        auto engine=propulsion->GetEngine(i);
+        engine->SetFuelFreeze(true);
+      }
+
+      //get contact info from ground reactions for use with groundprobes for ground callback
+      auto groundReactions=JSB->fdm->GetGroundReactions();
+      auto numGear=groundReactions->GetNumGearUnits();
+      info.numGear=0;
+      info.numContacts=0;
+      for(int i=0; i<numGear; i++){
+        auto gear=groundReactions->GetGearUnit(i);
+        if(gear->IsBogey()){
+          info.numGear+=1;
+        } else{
+          info.numContacts+=1;
+        }
+
+      }
 
       return info;
     }
     catch(...){
-      engineInfo info;
+      modelInfo info;
       info.numEngines=0;
       info.numTanks=0;
       info.engineType=0;
+      info.numContacts=0;
+      info.numGear=0;
       info.success=false;
       return info;
     }
@@ -80,12 +105,14 @@ extern "C" {
     IC->SetAltitudeASLFtIC(altft);
     IC->SetPsiDegIC(hdgTrue);
     IC->SetVcalibratedKtsIC(kts);
+
+
     return true;
   }
 
 
   bool JSBSim_FlightLoop(void* ptr){
-    auto* JSB=static_cast<JSBSim_FDM*>(ptr);    
+    auto* JSB=static_cast<JSBSim_FDM*>(ptr);
     return JSB->fdm->Run();
   }
 
@@ -150,6 +177,11 @@ extern "C" {
       return UINT32_MAX;
     }
    
+  }
+
+  dllExport void JSBSim_SetGroundCallback(void* ptr, GroundContactCallback callback){
+    auto* JSB=static_cast<JSBSim_FDM*>(ptr);
+    JSB->fdm->GetInertial()->SetGroundCallback(new xpGroundCallback(callback));
   }
 
 }
