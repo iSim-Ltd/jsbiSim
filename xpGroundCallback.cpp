@@ -4,7 +4,7 @@
 //location is the location of the contact itself. XP probe data needs to be fed per location
 double xpGroundCallback::GetAGLevel(double t, const JSBSim::FGLocation& location, JSBSim::FGLocation& contact, JSBSim::FGColumnVector3& normal, JSBSim::FGColumnVector3& vel, JSBSim::FGColumnVector3& angularVel) const{
 
-  JSBSim::FGLogging log(JSBSim::LogLevel::INFO);
+  //JSBSim::FGLogging log(JSBSim::LogLevel::INFO);
   vel.InitMatrix();
   angularVel.InitMatrix();
 
@@ -27,10 +27,9 @@ double xpGroundCallback::GetAGLevel(double t, const JSBSim::FGLocation& location
     //log<<"Sending lat/lon/alt: "<<latitude<<", "<<longitude<< "," << contactData.agl << std::endl;
   } else{
     //log<<"xpGroundCallback: No callback set for ground contact data"<<std::endl;
-    contactData.agl=0;
     contactData.normalX=0;
-    contactData.normalY=0;
-    contactData.normalZ=1;
+    contactData.normalY=1;
+    contactData.normalZ=0;
   }
 
 
