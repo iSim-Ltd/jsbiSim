@@ -55,7 +55,7 @@ double xpGroundCallback::GetAGLevel(double t, const JSBSim::FGLocation& location
   normal=ecefNormal;
 
 
-  //contact.SetEllipse(a, b);
+  contact.SetEllipse(a, b);
   contact.SetPositionGeodetic(longitude, latitude, contactData.agl);
 
   //log<<"Alt at contact : "<<latitude<<", "<<longitude<< "," << contactData.agl << std::endl;
